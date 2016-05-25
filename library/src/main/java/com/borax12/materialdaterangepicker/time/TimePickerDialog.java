@@ -108,6 +108,8 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
     private boolean mAllowAutoAdvance;
     private int mInitialHourOfDay;
     private int mInitialMinute;
+    private int mEndHourOfDay;
+    private int mEndMinute;
     private boolean mIs24HourMode;
     private String mTitle;
     private boolean mThemeDark;
@@ -169,16 +171,27 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
     public static TimePickerDialog newInstance(OnTimeSetListener callback,
                                                int hourOfDay, int minute, boolean is24HourMode) {
         TimePickerDialog ret = new TimePickerDialog();
-        ret.initialize(callback, hourOfDay, minute, is24HourMode);
+        ret.initialize(callback, hourOfDay, minute, hourOfDay, minute, is24HourMode);
+        return ret;
+    }
+
+    public static TimePickerDialog newInstance(OnTimeSetListener callback,
+                                               int hourOfDay, int minute, int hourOfDayEnd,
+                                               int minuteEnd, boolean is24HourMode) {
+        TimePickerDialog ret = new TimePickerDialog();
+        ret.initialize(callback, hourOfDay, minute, hourOfDayEnd, minuteEnd, is24HourMode);
         return ret;
     }
 
     public void initialize(OnTimeSetListener callback,
-                           int hourOfDay, int minute, boolean is24HourMode) {
+                           int hourOfDay, int minute, int hourOfDayEnd,
+                           int minuteEnd, boolean is24HourMode) {
         mCallback = callback;
 
         mInitialHourOfDay = hourOfDay;
         mInitialMinute = minute;
+        mEndHourOfDay = hourOfDayEnd;
+        mEndMinute = minuteEnd;
         mIs24HourMode = is24HourMode;
         mInKbMode = false;
         mTitle = "";
@@ -255,6 +268,12 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
         mInKbMode = false;
     }
 
+    public void setEndTime(int hourOfDay, int minute) {
+        mEndHourOfDay = hourOfDay;
+        mEndMinute = minute;
+        mInKbMode = false;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -263,6 +282,8 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
                 && savedInstanceState.containsKey(KEY_IS_24_HOUR_VIEW)) {
             mInitialHourOfDay = savedInstanceState.getInt(KEY_HOUR_OF_DAY);
             mInitialMinute = savedInstanceState.getInt(KEY_MINUTE);
+            mEndHourOfDay = savedInstanceState.getInt(KEY_HOUR_OF_DAY_END);
+            mEndMinute = savedInstanceState.getInt(KEY_MINUTE_END);
             mIs24HourMode = savedInstanceState.getBoolean(KEY_IS_24_HOUR_VIEW);
             mInKbMode = savedInstanceState.getBoolean(KEY_IN_KB_MODE);
             mTitle = savedInstanceState.getString(KEY_TITLE);
@@ -336,8 +357,8 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
         mTimePickerEnd = (RadialPickerLayout) view.findViewById(R.id.time_picker_end);
         mTimePickerEnd.setOnValueSelectedListener(this);
         mTimePickerEnd.setOnKeyListener(keyboardListener);
-        mTimePickerEnd.initialize(getActivity(), this, mInitialHourOfDay,
-                mInitialMinute, mIs24HourMode);
+        mTimePickerEnd.initialize(getActivity(), this, mEndHourOfDay,
+                mEndMinute, mIs24HourMode);
 
         int currentItemShowing = HOUR_INDEX;
         int currentItemShowingEnd = HOUR_INDEX;

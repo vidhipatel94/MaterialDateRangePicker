@@ -15,8 +15,7 @@ import com.borax12.materialdaterangepicker.time.TimePickerDialog;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements
-    DatePickerDialog.OnDateSetListener,TimePickerDialog.OnTimeSetListener
-{
+        DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
     private TextView dateTextView;
     private TextView timeTextView;
 
@@ -27,21 +26,26 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         // Find our View instances
-        dateTextView = (TextView)findViewById(R.id.date_textview);
-        timeTextView = (TextView)findViewById(R.id.time_textview);
-        Button dateButton = (Button)findViewById(R.id.date_button);
-        Button timeButton = (Button)findViewById(R.id.time_button);
+        dateTextView = (TextView) findViewById(R.id.date_textview);
+        timeTextView = (TextView) findViewById(R.id.time_textview);
+        Button dateButton = (Button) findViewById(R.id.date_button);
+        Button timeButton = (Button) findViewById(R.id.time_button);
 
         // Show a datepicker when the dateButton is clicked
         dateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Calendar now = Calendar.getInstance();
+                Calendar after = Calendar.getInstance();
+                after.set(Calendar.DAY_OF_MONTH, 28);
                 DatePickerDialog dpd = com.borax12.materialdaterangepicker.date.DatePickerDialog.newInstance(
                         MainActivity.this,
                         now.get(Calendar.YEAR),
                         now.get(Calendar.MONTH),
-                        now.get(Calendar.DAY_OF_MONTH)
+                        now.get(Calendar.DAY_OF_MONTH),
+                        after.get(Calendar.YEAR),
+                        after.get(Calendar.MONTH),
+                        after.get(Calendar.DAY_OF_MONTH)
                 );
                 dpd.show(getFragmentManager(), "Datepickerdialog");
             }
@@ -51,10 +55,15 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 Calendar now = Calendar.getInstance();
+                Calendar after = Calendar.getInstance();
+                after.set(Calendar.HOUR_OF_DAY, 2);
+                after.set(Calendar.MINUTE, 2);
                 TimePickerDialog tpd = TimePickerDialog.newInstance(
                         MainActivity.this,
                         now.get(Calendar.HOUR_OF_DAY),
                         now.get(Calendar.MINUTE),
+                        after.get(Calendar.HOUR_OF_DAY),
+                        after.get(Calendar.MINUTE),
                         false
                 );
                 tpd.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -72,23 +81,23 @@ public class MainActivity extends AppCompatActivity implements
     public void onResume() {
         super.onResume();
         DatePickerDialog dpd = (DatePickerDialog) getFragmentManager().findFragmentByTag("Datepickerdialog");
-        if(dpd != null) dpd.setOnDateSetListener(this);
+        if (dpd != null) dpd.setOnDateSetListener(this);
     }
 
 
     @Override
-    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth,int yearEnd, int monthOfYearEnd, int dayOfMonthEnd) {
-        String date = "You picked the following date: From- "+dayOfMonth+"/"+(++monthOfYear)+"/"+year+" To "+dayOfMonthEnd+"/"+(++monthOfYearEnd)+"/"+yearEnd;
+    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth, int yearEnd, int monthOfYearEnd, int dayOfMonthEnd) {
+        String date = "You picked the following date: From- " + dayOfMonth + "/" + (++monthOfYear) + "/" + year + " To " + dayOfMonthEnd + "/" + (++monthOfYearEnd) + "/" + yearEnd;
         dateTextView.setText(date);
     }
 
     @Override
     public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute, int hourOfDayEnd, int minuteEnd) {
-        String hourString = hourOfDay < 10 ? "0"+hourOfDay : ""+hourOfDay;
-        String minuteString = minute < 10 ? "0"+minute : ""+minute;
-        String hourStringEnd = hourOfDayEnd < 10 ? "0"+hourOfDayEnd : ""+hourOfDayEnd;
-        String minuteStringEnd = minuteEnd < 10 ? "0"+minuteEnd : ""+minuteEnd;
-        String time = "You picked the following time: From - "+hourString+"h"+minuteString+" To - "+hourStringEnd+"h"+minuteStringEnd;
+        String hourString = hourOfDay < 10 ? "0" + hourOfDay : "" + hourOfDay;
+        String minuteString = minute < 10 ? "0" + minute : "" + minute;
+        String hourStringEnd = hourOfDayEnd < 10 ? "0" + hourOfDayEnd : "" + hourOfDayEnd;
+        String minuteStringEnd = minuteEnd < 10 ? "0" + minuteEnd : "" + minuteEnd;
+        String time = "You picked the following time: From - " + hourString + "h" + minuteString + " To - " + hourStringEnd + "h" + minuteStringEnd;
 
         timeTextView.setText(time);
     }
