@@ -157,4 +157,23 @@ public class Utils {
         }
         return typedValue.data;
     }
+
+    public static int getPrimaryColorFromThemeIfAvailable(Context context) {
+        TypedValue typedValue = new TypedValue();
+        //First, try the android:colorAccent
+        if (Build.VERSION.SDK_INT >= 21) {
+            context.getTheme().resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
+            return typedValue.data;
+        }
+        //Next, try colorAccent from support lib
+        int colorPrimaryResId = context.getResources().getIdentifier("colorPrimary", "attr", context.getPackageName());
+        if (colorPrimaryResId == 0) {
+            return -1;
+        }
+
+        if (!context.getTheme().resolveAttribute(colorPrimaryResId, typedValue, true)) {
+            return -1;
+        }
+        return typedValue.data;
+    }
 }

@@ -62,4 +62,6 @@
     <color name="mdtp_done_text_color_dark_normal">#ffffff</color>
     <color name="mdtp_done_text_color_dark_disabled">#888888</color>
     <color name="mdtp_done_disabled_dark">#bfbfbf</color>
+
+    <color name="grey_600">#757575</color>
 </resources>

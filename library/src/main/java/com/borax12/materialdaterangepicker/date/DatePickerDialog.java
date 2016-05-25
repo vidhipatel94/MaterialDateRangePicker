@@ -21,8 +21,10 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +38,7 @@ import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TabHost;
+import android.widget.TabWidget;
 import android.widget.TextView;
 
 import com.borax12.materialdaterangepicker.HapticFeedbackController;
@@ -90,6 +93,7 @@ public class DatePickerDialog extends DialogFragment implements
     private static final String KEY_SELECTABLE_DAYS_END = "selectable_days_end";
     private static final String KEY_THEME_DARK = "theme_dark";
     private static final String KEY_ACCENT = "accent";
+    private static final String KEY_PRIMARY = "primary";
     private static final String KEY_VIBRATE = "vibrate";
     private static final String KEY_DISMISS = "dismiss";
 
@@ -137,6 +141,7 @@ public class DatePickerDialog extends DialogFragment implements
 
     private boolean mThemeDark;
     private int mAccentColor = -1;
+    private int mPrimaryColor = -1;
     private boolean mVibrate;
     private boolean mDismissOnPause;
 
@@ -241,6 +246,7 @@ public class DatePickerDialog extends DialogFragment implements
 
         mThemeDark = false;
         mAccentColor = -1;
+        mPrimaryColor = -1;
         mVibrate = true;
         mDismissOnPause = false;
     }
@@ -302,6 +308,7 @@ public class DatePickerDialog extends DialogFragment implements
         outState.putSerializable(KEY_SELECTABLE_DAYS_END, selectableDaysEnd);
         outState.putBoolean(KEY_THEME_DARK, mThemeDark);
         outState.putInt(KEY_ACCENT, mAccentColor);
+        outState.putInt(KEY_PRIMARY, mPrimaryColor);
         outState.putBoolean(KEY_VIBRATE, mVibrate);
         outState.putBoolean(KEY_DISMISS, mDismissOnPause);
     }
@@ -374,6 +381,7 @@ public class DatePickerDialog extends DialogFragment implements
             selectableDaysEnd = (Calendar[]) savedInstanceState.getSerializable(KEY_SELECTABLE_DAYS_END);
             mThemeDark = savedInstanceState.getBoolean(KEY_THEME_DARK);
             mAccentColor = savedInstanceState.getInt(KEY_ACCENT);
+            mPrimaryColor = savedInstanceState.getInt(KEY_PRIMARY);
             mVibrate = savedInstanceState.getBoolean(KEY_VIBRATE);
             mDismissOnPause = savedInstanceState.getBoolean(KEY_DISMISS);
         }
@@ -464,11 +472,31 @@ public class DatePickerDialog extends DialogFragment implements
             view.findViewById(R.id.day_picker_selected_date_layout).setBackgroundColor(mAccentColor);
             view.findViewById(R.id.day_picker_selected_date_layout_end).setBackgroundColor(mAccentColor);
             okButton.setTextColor(mAccentColor);
-            cancelButton.setTextColor(mAccentColor);
+            cancelButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.grey_600));
             mYearPickerView.setAccentColor(mAccentColor);
             mDayPickerView.setAccentColor(mAccentColor);
             mYearPickerViewEnd.setAccentColor(mAccentColor);
             mDayPickerViewEnd.setAccentColor(mAccentColor);
+        }
+
+        if (mPrimaryColor == -1) {
+            int primaryColor = Utils.getPrimaryColorFromThemeIfAvailable(getActivity());
+            if (primaryColor != -1) {
+                mPrimaryColor = primaryColor;
+            }
+        }
+        if (mPrimaryColor != -1) {
+            TabWidget widget = tabHost.getTabWidget();
+            for (int i = 0; i < widget.getChildCount(); i++) {
+                View v = widget.getChildAt(i);
+
+                // Look for the title view to ensure this is an indicator and not a divider.
+                TextView tv = (TextView) v.findViewById(android.R.id.title);
+                if (tv == null) {
+                    continue;
+                }
+                v.getBackground().setColorFilter(mPrimaryColor, PorterDuff.Mode.SRC_ATOP);
+            }
         }
 
         updateDisplay(false);
@@ -686,6 +714,10 @@ public class DatePickerDialog extends DialogFragment implements
         mAccentColor = accentColor;
     }
 
+    public void setPrimaryColor(int primaryColor) {
+        mPrimaryColor = primaryColor;
+    }
+
     /**
      * Get the accent color of this dialog
      *
@@ -693,6 +725,10 @@ public class DatePickerDialog extends DialogFragment implements
      */
     public int getAccentColor() {
         return mAccentColor;
+    }
+
+    public int getPrimaryColor() {
+        return mPrimaryColor;
     }
 
     @SuppressWarnings("unused")
