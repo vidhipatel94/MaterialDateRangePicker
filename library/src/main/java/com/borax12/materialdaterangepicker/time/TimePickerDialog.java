@@ -543,6 +543,7 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
                 }
                 v.getBackground().setColorFilter(mPrimaryColor, PorterDuff.Mode.SRC_ATOP);
             }
+            mOkButton.setTextColor(mPrimaryColor);
         }
 
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {

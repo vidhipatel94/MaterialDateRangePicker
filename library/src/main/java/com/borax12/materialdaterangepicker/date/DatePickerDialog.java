@@ -497,6 +497,7 @@ public class DatePickerDialog extends DialogFragment implements
                 }
                 v.getBackground().setColorFilter(mPrimaryColor, PorterDuff.Mode.SRC_ATOP);
             }
+            okButton.setTextColor(mPrimaryColor);
         }
 
         updateDisplay(false);
