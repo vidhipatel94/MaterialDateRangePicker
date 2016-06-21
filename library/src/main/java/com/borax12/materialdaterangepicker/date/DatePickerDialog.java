@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -96,6 +97,7 @@ public class DatePickerDialog extends DialogFragment implements
     private static final String KEY_PRIMARY = "primary";
     private static final String KEY_VIBRATE = "vibrate";
     private static final String KEY_DISMISS = "dismiss";
+    private static final String KEY_HIGHLIGHT_TAB = "highlight_tab";
 
     private static final int DEFAULT_START_YEAR = 1900;
     private static final int DEFAULT_END_YEAR = 2100;
@@ -144,6 +146,7 @@ public class DatePickerDialog extends DialogFragment implements
     private int mPrimaryColor = -1;
     private boolean mVibrate;
     private boolean mDismissOnPause;
+    private boolean mHighlightTab = false;
 
     private HapticFeedbackController mHapticFeedbackController;
 
@@ -249,6 +252,7 @@ public class DatePickerDialog extends DialogFragment implements
         mPrimaryColor = -1;
         mVibrate = true;
         mDismissOnPause = false;
+        mHighlightTab = false;
     }
 
     @Override
@@ -311,6 +315,7 @@ public class DatePickerDialog extends DialogFragment implements
         outState.putInt(KEY_PRIMARY, mPrimaryColor);
         outState.putBoolean(KEY_VIBRATE, mVibrate);
         outState.putBoolean(KEY_DISMISS, mDismissOnPause);
+        outState.putBoolean(KEY_HIGHLIGHT_TAB, mHighlightTab);
     }
 
     @Override
@@ -326,7 +331,7 @@ public class DatePickerDialog extends DialogFragment implements
 
         final Activity activity = getActivity();
 
-        TabHost.TabSpec startDatePage = tabHost.newTabSpec("start");
+        final TabHost.TabSpec startDatePage = tabHost.newTabSpec("start");
         startDatePage.setContent(R.id.start_date_group);
         startDatePage.setIndicator((startTitle != null && !startTitle.isEmpty()) ? startTitle : activity.getResources().getString(R.string.mdtp_from));
 
@@ -384,6 +389,7 @@ public class DatePickerDialog extends DialogFragment implements
             mPrimaryColor = savedInstanceState.getInt(KEY_PRIMARY);
             mVibrate = savedInstanceState.getBoolean(KEY_VIBRATE);
             mDismissOnPause = savedInstanceState.getBoolean(KEY_DISMISS);
+            mHighlightTab = savedInstanceState.getBoolean(KEY_HIGHLIGHT_TAB);
         }
 
         mDayPickerView = new com.borax12.materialdaterangepicker.date.SimpleDayPickerView(activity, this);
@@ -487,15 +493,27 @@ public class DatePickerDialog extends DialogFragment implements
         }
         if (mPrimaryColor != -1) {
             TabWidget widget = tabHost.getTabWidget();
-            for (int i = 0; i < widget.getChildCount(); i++) {
-                View v = widget.getChildAt(i);
-
-                // Look for the title view to ensure this is an indicator and not a divider.
-                TextView tv = (TextView) v.findViewById(android.R.id.title);
-                if (tv == null) {
-                    continue;
+            if (mHighlightTab) {
+                for (int i = 0; i < widget.getChildCount(); i++) {
+                    widget.getChildAt(i).setBackgroundColor(Color.parseColor("#00000000")); // unselected
+                    TextView tv = (TextView) widget.getChildAt(i).findViewById(android.R.id.title); //Unselected Tabs
+                    tv.setTextColor(ContextCompat.getColor(getActivity(), R.color.mdtp_date_picker_text_normal));
                 }
-                v.getBackground().setColorFilter(mPrimaryColor, PorterDuff.Mode.SRC_ATOP);
+                widget.getChildAt(tabHost.getCurrentTab())
+                        .setBackgroundColor(mPrimaryColor); // selected
+                TextView tv = (TextView) widget.getChildAt(tabHost.getCurrentTab()).findViewById(android.R.id.title); //Unselected Tabs
+                tv.setTextColor(Color.parseColor("#ffffff"));
+            } else {
+                for (int i = 0; i < widget.getChildCount(); i++) {
+                    View v = widget.getChildAt(i);
+
+                    // Look for the title view to ensure this is an indicator and not a divider.
+                    TextView tv = (TextView) v.findViewById(android.R.id.title);
+                    if (tv == null) {
+                        continue;
+                    }
+                    v.getBackground().setColorFilter(mPrimaryColor, PorterDuff.Mode.SRC_ATOP);
+                }
             }
             okButton.setTextColor(mPrimaryColor);
         }
@@ -533,6 +551,19 @@ public class DatePickerDialog extends DialogFragment implements
                     calendarDay = new com.borax12.materialdaterangepicker.date.MonthAdapter.CalendarDay(mCalendarEnd.getTimeInMillis());
                     mDayPickerViewEnd.goTo(calendarDay, true, true, false);
                     okButton.setText(R.string.mdtp_ok);
+                }
+
+                if (mHighlightTab && mPrimaryColor != -1) {
+                    for (int i = 0; i < tabHost.getTabWidget().getChildCount(); i++) {
+                        tabHost.getTabWidget().getChildAt(i)
+                                .setBackgroundColor(Color.parseColor("#00000000")); // unselected
+                        TextView tv = (TextView) tabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title); //Unselected Tabs
+                        tv.setTextColor(ContextCompat.getColor(getActivity(), R.color.mdtp_date_picker_text_normal));
+                    }
+                    tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab())
+                            .setBackgroundColor(mPrimaryColor); // selected
+                    TextView tv = (TextView) tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab()).findViewById(android.R.id.title); //Unselected Tabs
+                    tv.setTextColor(Color.parseColor("#ffffff"));
                 }
             }
         });
@@ -730,6 +761,14 @@ public class DatePickerDialog extends DialogFragment implements
 
     public int getPrimaryColor() {
         return mPrimaryColor;
+    }
+
+    public boolean isHighlightTab() {
+        return mHighlightTab;
+    }
+
+    public void highlightTab(boolean mHighlightTab) {
+        this.mHighlightTab = mHighlightTab;
     }
 
     @SuppressWarnings("unused")

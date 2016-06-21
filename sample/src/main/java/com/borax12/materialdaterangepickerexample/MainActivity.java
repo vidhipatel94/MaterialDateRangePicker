@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements
                         after.get(Calendar.MONTH),
                         after.get(Calendar.DAY_OF_MONTH)
                 );
+                dpd.highlightTab(true);
                 dpd.show(getFragmentManager(), "Datepickerdialog");
             }
         });
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements
                         Log.d("TimePicker", "Dialog was cancelled");
                     }
                 });
+                tpd.highlightTab(true);
                 tpd.show(getFragmentManager(), "Timepickerdialog");
             }
         });

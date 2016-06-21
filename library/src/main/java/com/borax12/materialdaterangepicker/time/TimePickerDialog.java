@@ -21,6 +21,7 @@ import android.app.ActionBar.LayoutParams;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -71,6 +72,7 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
     private static final String KEY_PRIMARY = "primary";
     private static final String KEY_VIBRATE = "vibrate";
     private static final String KEY_DISMISS = "dismiss";
+    private static final String KEY_HIGHLIGHT_TAB = "highlight_tab";
 
     public static final int HOUR_INDEX = 0;
     public static final int MINUTE_INDEX = 1;
@@ -117,6 +119,7 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
     private int mAccentColor = -1;
     private int mPrimaryColor = -1;
     private boolean mDismissOnPause;
+    private boolean mHighlightTab = false;
 
     // For hardware IME input.
     private char mPlaceholderText;
@@ -200,6 +203,7 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
         mPrimaryColor = -1;
         mVibrate = true;
         mDismissOnPause = false;
+        mHighlightTab = false;
     }
 
     /**
@@ -226,6 +230,14 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
 
     public void setPrimaryColor(int color) {
         mPrimaryColor = color;
+    }
+
+    public boolean isHighlightTab() {
+        return mHighlightTab;
+    }
+
+    public void highlightTab(boolean mHighlightTab) {
+        this.mHighlightTab = mHighlightTab;
     }
 
     public boolean isThemeDark() {
@@ -291,6 +303,7 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
             mAccentColor = savedInstanceState.getInt(KEY_ACCENT);
             mPrimaryColor = savedInstanceState.getInt(KEY_PRIMARY);
             mVibrate = savedInstanceState.getBoolean(KEY_VIBRATE);
+            mHighlightTab = savedInstanceState.getBoolean(KEY_HIGHLIGHT_TAB);
         }
     }
 
@@ -554,15 +567,27 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
         }
         if (mPrimaryColor != -1) {
             TabWidget widget = tabHost.getTabWidget();
-            for (int i = 0; i < widget.getChildCount(); i++) {
-                View v = widget.getChildAt(i);
-
-                // Look for the title view to ensure this is an indicator and not a divider.
-                TextView tv = (TextView) v.findViewById(android.R.id.title);
-                if (tv == null) {
-                    continue;
+            if (mHighlightTab) {
+                for (int i = 0; i < widget.getChildCount(); i++) {
+                    widget.getChildAt(i).setBackgroundColor(Color.parseColor("#00000000")); // unselected
+                    TextView tv = (TextView) widget.getChildAt(i).findViewById(android.R.id.title); //Unselected Tabs
+                    tv.setTextColor(ContextCompat.getColor(getActivity(), R.color.mdtp_date_picker_text_normal));
                 }
-                v.getBackground().setColorFilter(mPrimaryColor, PorterDuff.Mode.SRC_ATOP);
+                widget.getChildAt(tabHost.getCurrentTab())
+                        .setBackgroundColor(mPrimaryColor); // selected
+                TextView tv = (TextView) widget.getChildAt(tabHost.getCurrentTab()).findViewById(android.R.id.title); //Unselected Tabs
+                tv.setTextColor(Color.parseColor("#ffffff"));
+            } else {
+                for (int i = 0; i < widget.getChildCount(); i++) {
+                    View v = widget.getChildAt(i);
+
+                    // Look for the title view to ensure this is an indicator and not a divider.
+                    TextView tv = (TextView) v.findViewById(android.R.id.title);
+                    if (tv == null) {
+                        continue;
+                    }
+                    v.getBackground().setColorFilter(mPrimaryColor, PorterDuff.Mode.SRC_ATOP);
+                }
             }
             mOkButton.setTextColor(mPrimaryColor);
         }
@@ -582,6 +607,19 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
                     setMinute(mTimePickerEnd.getMinutes());
                     updateAmPmDisplay(mTimePickerEnd.getIsCurrentlyAmOrPm());
                     mOkButton.setText(R.string.mdtp_ok);
+                }
+
+                if (mHighlightTab && mPrimaryColor != -1) {
+                    for (int i = 0; i < tabHost.getTabWidget().getChildCount(); i++) {
+                        tabHost.getTabWidget().getChildAt(i)
+                                .setBackgroundColor(Color.parseColor("#00000000")); // unselected
+                        TextView tv = (TextView) tabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title); //Unselected Tabs
+                        tv.setTextColor(ContextCompat.getColor(getActivity(), R.color.mdtp_date_picker_text_normal));
+                    }
+                    tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab())
+                            .setBackgroundColor(mPrimaryColor); // selected
+                    TextView tv = (TextView) tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab()).findViewById(android.R.id.title); //Unselected Tabs
+                    tv.setTextColor(Color.parseColor("#ffffff"));
                 }
             }
         });
@@ -668,6 +706,7 @@ public class TimePickerDialog extends DialogFragment implements OnValueSelectedL
             outState.putInt(KEY_ACCENT, mAccentColor);
             outState.putInt(KEY_PRIMARY, mPrimaryColor);
             outState.putBoolean(KEY_VIBRATE, mVibrate);
+            outState.putBoolean(KEY_HIGHLIGHT_TAB, mHighlightTab);
         }
     }
 
